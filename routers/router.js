@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const {createPost, displayPost,likeSystemIncrease, likeSystemDecrease, singlePost, createComment, likeSystemIncreaseComment, likeSystemDecreaseComment, createReply, displePostForProfile} = require('../controllers/ิpostController')
 const {createAccount,loginAccount, accountData, logoutAccount, singleAccountData, getAllAccounts} = require('../controllers/authController')
-const { makingRequest, requestCheck } = require('../controllers/friendController')
+const { makingRequest, requestCheck, removeRequest, acceptRequest } = require('../controllers/friendController')
 
 
 //post
@@ -27,5 +27,7 @@ router.get('/get-all-accounts',getAllAccounts)
 //friends
 router.post('/making-request',makingRequest)
 router.post('/checking-request',requestCheck)
+router.delete('/remove-request',removeRequest)
+router.put('/accept-request',acceptRequest)
 
 module.exports = router

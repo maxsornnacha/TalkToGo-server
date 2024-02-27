@@ -1,7 +1,5 @@
 const Members = require('../models/registration')
 const FriendShips = require('../models/friendship')
-const friendship = require('../models/friendship')
-const { json } = require('body-parser')
 
 exports.makingRequest = async (req,res)=>{
    const {senderID , getterID} = req.body
@@ -35,12 +33,12 @@ try{
             status:'pending'
         })
 
-        await newFriendship.save()
-        .then(()=>{
+        await newFriendship.save().then(()=>{
             console.log('คำขอเป็นเพื่อนได้ถูกส่งเรียบร้อบ')
-        })
-        .catch(()=>{
+            res.json({ requester:senderID,recipient:getterID,status:'pending'})
+        }).catch(()=>{
             console.log('การส่งคำขอไม่สำเร็จ เนื่องจาก sever เกิดปัญหา')
+            res.status(500).json('การส่งคำขอไม่สำเร็จ เนื่องจาก sever เกิดปัญหา')
         })
     }
 
@@ -88,4 +86,51 @@ try{
         status:null
     })
 }
+}
+
+
+exports.removeRequest = async (req,res)=>{
+    const {senderID , getterID} = req.body
+
+     await FriendShips.findOneAndDelete({
+        $or:[
+            {requester:senderID , recipient:getterID},
+            {requester:getterID , recipient:senderID}
+        ]
+    })
+    .then((data)=>{
+        res.json({
+            requester:null,
+            recipient:null,
+            status:null
+        })
+    })
+    .catch((error)=>{
+        console.log(error)
+        res.status(500).json('เกิดข้อผิดพลาด ทาง Server')
+    })
+
+}
+
+
+exports.acceptRequest = async (req,res)=>{
+    const {senderID , getterID} = req.body
+    console.log('senderID',senderID)
+    console.log('getterID',getterID)
+
+    await FriendShips.findOneAndUpdate({
+        $or:[
+            {requester:senderID , recipient:getterID},
+            {requester:getterID , recipient:senderID}
+        ]
+    },{$set:{
+       status:'accepted'
+    }})
+    .then((data)=>{
+        res.json({ requester:getterID,recipient:senderID,status:'accepted'})
+    })
+    .catch((error)=>{
+        console.log(error)
+        res.status(500).json('เกิดข้อผิดพลาด ทาง Server')
+    })
 }
