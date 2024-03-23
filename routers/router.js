@@ -3,7 +3,8 @@ const router = express.Router()
 const {createPost, displayPost,likeSystemIncrease, likeSystemDecrease, singlePost, createComment, likeSystemIncreaseComment, likeSystemDecreaseComment, createReply, displePostForProfile} = require('../controllers/ิpostController')
 const {createAccount,loginAccount, accountData, logoutAccount, singleAccountData, getAllAccounts} = require('../controllers/authController')
 const { makingRequest, requestCheck, removeRequest, acceptRequest, fetchFriendRequest, fetchFriendlist } = require('../controllers/friendController')
-const { createChatroom, sendMessage, getMessage, readMessage } = require('../controllers/chatController')
+const { createChatroom, sendMessage, getMessage, readMessage, getAllMessages,  getAllMessageAndAccounts } = require('../controllers/chatController')
+const { createTalkingRoom, getTalkingRooms, getSingleTalkingRoom, getAllMembers, requestToTheRoom, getRoomRequest, deleteRoomRequest, allRoomRequested, acceptRoomRequested, rejectRoomRequested} = require('../controllers/roomController')
 
 
 //post
@@ -39,5 +40,18 @@ router.post('/create-chatmessege-room',createChatroom)
 router.put('/send-message',sendMessage)
 router.post('/get-message',getMessage)
 router.post('/read-message',readMessage)
+router.get('/all-messages/:senderID',getAllMessages)
+router.post('/all-messages-accounts',getAllMessageAndAccounts)
 
+//Talkingrooms
+router.post('/create-talkingroom',createTalkingRoom)
+router.post('/all-talkingrooms',getTalkingRooms)
+router.post('/get-single-talkingroom',getSingleTalkingRoom)
+router.post('/get-all-members',getAllMembers)
+router.put('/room-request',requestToTheRoom)
+router.get('/get-room-request/:accountID',getRoomRequest)
+router.delete('/delete-room-request',deleteRoomRequest)
+router.get('/all-room-requested/:adminID',allRoomRequested)
+router.put('/accept-room-requested',acceptRoomRequested)
+router.delete('/reject-room-requested',rejectRoomRequested)
 module.exports = router

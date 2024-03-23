@@ -3,16 +3,16 @@ const FriendShips = require('../models/friendship')
 const mongoose = require('mongoose')
 
 exports.makingRequest = async (req,res)=>{
-   const {senderID , getterID} = req.body
-
 try{
+    const {senderID , getterID} = req.body
+
     const sender = await Members.findById(senderID)
     const getter = await Members.findById(getterID)
 
    if(!sender || !getter){
-    console.log('ไม่พบบัญชีที่ดำเนินการ')
+    //ไม่พบบัญชีที่ดำเนินการ
    }else{
-    console.log('พบบัญชีทั้งสอง ดำเนินการต่อได้')
+    //พบบัญชีทั้งสอง ดำเนินการต่อได้
     //ต่อไปเช็คว่าได้ส่ง request ไปแล้วหรือยัง
     const existingFriendship = await FriendShips.findOne({
         $or:[
@@ -20,7 +20,7 @@ try{
             {requester:getterID , recipient:senderID}
         ]
     })
-
+    // เช็คว่าเป็นเพื่อนกันแล้วรึป่าว
     if(existingFriendship){
         res.json({
             requester:existingFriendship.requester,
@@ -34,27 +34,30 @@ try{
             status:'pending'
         })
 
-        await newFriendship.save().then(()=>{
-            console.log('คำขอเป็นเพื่อนได้ถูกส่งเรียบร้อบ')
+        await newFriendship.save()
+        .then(()=>{
             res.json({ requester:senderID,recipient:getterID,status:'pending'})
-        }).catch(()=>{
-            console.log('การส่งคำขอไม่สำเร็จ เนื่องจาก sever เกิดปัญหา')
-            res.status(500).json('การส่งคำขอไม่สำเร็จ เนื่องจาก sever เกิดปัญหา')
+        })
+        .catch((error)=>{
+            console.log('การส่งคำขอเป็นเพื่อนผิดพลาดเนื่องจาก :', error)
+            res.status(400).json({error:'การส่งคำขอไม่สำเร็จ เนื่องจากไม่ตรงตามเงื่อนไข'})
         })
     }
 
    }
 
 }catch{
-    console.log('ไม่พบบัญชีที่ดำเนินการ')
+    console.log('การส่งคำขอเป็นเพื่อนผิดพลาดเนื่องจาก :', error)
+    res.status(500).json({error:'เกิดข้อผิดพลาดกับ เซิร์ฟเวอร์'})
 }
   
 }
 
 
 exports.requestCheck = async (req,res)=>{
-    const {senderID , getterID} = req.body
 try{
+    const {senderID , getterID} = req.body
+
      //ต่อไปเช็คว่าได้ส่ง request ไปแล้วหรือยัง
      const existingFriendship = await FriendShips.findOne({
         $or:[
@@ -64,14 +67,14 @@ try{
     })
 
     if(!existingFriendship){
-        console.log('ไม่พบการส่งรีเควส')
+        //ไม่พบการส่งรีเควส
         res.json({
             requester:null,
             recipient:null,
             status:null
         })
     }else{
-        console.log('มีรีเควสอยู่แล้ว')
+        //มีรีเควสอยู่แล้ว
         res.json({
             requester:existingFriendship.requester,
             recipient:existingFriendship.recipient,
@@ -80,7 +83,7 @@ try{
     }
 
 }catch{
-    console.log('ไม่พบการส่งรีเควส')
+    //ไม่พบการส่งรีเควส
     res.json({
         requester:null,
         recipient:null,
@@ -91,6 +94,8 @@ try{
 
 
 exports.removeRequest = async (req,res)=>{
+    try{
+
     const {senderID , getterID} = req.body
 
      await FriendShips.findOneAndDelete({
@@ -107,14 +112,22 @@ exports.removeRequest = async (req,res)=>{
         })
     })
     .catch((error)=>{
-        console.log(error)
-        res.status(500).json('เกิดข้อผิดพลาด ทาง Server')
+        console.log('การลบคำขอร้องผิดพลาดเนื่องจาก :', error)
+        res.status(404).json({error:'ไม่พบข้อมูลที่ค้นหา'})
     })
+
+    }
+    catch(error){
+        console.log('การลบคำขอร้องผิดพลาดเนื่องจาก :', error)
+        res.status(500).json({error:'เกิดข้อผิดพลาดกับ เซิร์ฟเวอร์'})
+    }
 
 }
 
 
 exports.acceptRequest = async (req,res)=>{
+    try{
+
     const {senderID , getterID} = req.body
     console.log('senderID',senderID)
     console.log('getterID',getterID)
@@ -131,13 +144,21 @@ exports.acceptRequest = async (req,res)=>{
         res.json({ requester:getterID,recipient:senderID,status:'accepted'})
     })
     .catch((error)=>{
-        console.log(error)
-        res.status(500).json('เกิดข้อผิดพลาด ทาง Server')
+        console.log('การยอมรับขอผิดพลาดเนื่องจาก :', error)
+        res.status(404).json({error:'ไม่พบข้อมูลที่ค้นหา'})
     })
+
+    }
+    catch(error){
+        console.log('การยอมรับขอผิดพลาดเนื่องจาก :', error)
+        res.status(500).json({error:'เกิดข้อผิดพลาดกับ เซิร์ฟเวอร์'})
+    }
 }
 
 
 exports.fetchFriendRequest = async (req,res)=>{
+    try{
+
     const {accountID} = req.params
 
         const data = await FriendShips.find({
@@ -153,15 +174,23 @@ exports.fetchFriendRequest = async (req,res)=>{
             res.json({data:data,getterID:accountID});
         })
         .catch((error)=>{
-            console.log(error);
-            res.status(500).json('เกิดข้อผิดพลาดกับ server')
+            console.log('การดึงข้อมูลคำขอทั้งหมดผิดพลาดเนื่องจาก :', error)
+            res.status(404).json({error:'ไม่พบข้อมูลที่ค้นหา'})
         })
 
+    }
+    catch(error){
+        console.log('การดึงข้อมูลคำขอทั้งหมดผิดพลาดเนื่องจาก :', error)
+        res.status(500).json({error:'เกิดข้อผิดพลาดกับ เซิร์ฟเวอร์'})
+    }
 
 
 }
 
 exports.fetchFriendlist = async (req,res)=>{
+
+    try{
+    
     const {accountID} = req.params
 
     const data = await FriendShips.find({
@@ -185,8 +214,14 @@ exports.fetchFriendlist = async (req,res)=>{
         res.json(data);
     })
     .catch((error)=>{
-        console.log(error);
-        res.status(500).json('เกิดข้อผิดพลาดกับ server')
+        console.log('การดึงข้อมูลบัญชีของคนที่เป็นเพื่อนกันผิดพลาดเนื่องจาก :', error)
+        res.status(404).json({error:'ไม่พบข้อมูลที่ค้นหา'})
     })
+
+    }
+    catch(error){
+        console.log('การดึงข้อมูลบัญชีของคนที่เป็นเพื่อนกันผิดพลาดเนื่องจาก :', error)
+        res.status(500).json({error:'เกิดข้อผิดพลาดกับ เซิร์ฟเวอร์'})
+    }
    
 }

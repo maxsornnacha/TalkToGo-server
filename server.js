@@ -1,17 +1,17 @@
-const  express = require('express')
-const app = express()
+const  express = require('express');
+const app = express();
 //import middlewares
-const morgan = require('morgan')
-const cors = require('cors')
-const cookieParser = require('cookie-parser')
-require('dotenv').config()
+const morgan = require('morgan');
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
+require('dotenv').config();
 const bodyParser = require('body-parser');
 //import dataBase
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 //import Router 
-const router = require('./routers/router')
+const router = require('./routers/router');
 //import session
-const session = require('express-session')
+const session = require('express-session');
 
 
 //เชื่อมต่อ mongoose
@@ -21,7 +21,7 @@ mongoose.connect(process.env.DATABASE)
 })
 .catch((error)=>{
     console.log('error to connect to the database, the reason is as followed :',error)
-})
+});
 
 //middleware
 app.use(morgan('dev'));
@@ -45,4 +45,4 @@ app.use(router);
 
 app.listen(process.env.PORT,()=>{
     console.log(`port main server running on ${process.env.PORT}`)
-})
+});

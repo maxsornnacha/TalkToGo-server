@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 
-//Schema Registration form of member
+//Schema for friend relationship form of member
 const friendshipSchema = new mongoose.Schema({
     requester:{
         type:mongoose.Schema.ObjectId,

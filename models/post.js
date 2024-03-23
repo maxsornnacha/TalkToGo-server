@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 
-//Schema Registration form of member
+//Schema post form
 const postSchema = new mongoose.Schema({
     accountID:{
         type:String,

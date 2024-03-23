@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 
-//Schema Registration form of member
+//Schema for chat room form 
 const chatroomSchema = new mongoose.Schema({
     participants:[{
         type:String,
