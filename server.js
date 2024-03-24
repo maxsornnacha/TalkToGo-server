@@ -42,7 +42,8 @@ app.use(
 );
 app.use(router);
 
+const port = process.env.PORT || 5500
 
-app.listen(process.env.PORT,()=>{
-    console.log(`port main server running on ${process.env.PORT}`)
+app.listen(port ,()=>{
+    console.log(`port main server running on ${port}`)
 });
