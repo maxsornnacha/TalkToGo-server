@@ -36,6 +36,9 @@ app.use(express.json());
 const corsOptions = {
     origin: [process.env.CLIENT_URL , process.env.CLIENT_URL_1],
     credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 };
 app.use(cors(corsOptions));
 
