@@ -74,7 +74,7 @@ app.use(
     cookie:{
       secure: process.env.NODE_ENV === 'production', // only transmit cookie over https
       maxAge: 3 * 60 * 60 * 1000, // 3 hours in milliseconds
-      sameSite:process.env.NODE_ENV === 'production'?'lax':'lax'
+      sameSite:process.env.NODE_ENV === 'production'?'strict':'lax'
     }
   })
 );
