@@ -67,7 +67,6 @@ let redisStore = new RedisStore({
 })
 
 //Redis connection to session and configure session middleware
-app.enable('trust proxy'); // trust first proxy
 app.use(
   session({
     secret: 'JBJBFJHDBHJDBHJFBKSBSJLKDBSJKFBSJ',
@@ -76,11 +75,15 @@ app.use(
     saveUninitialized: false, // recommended: only save session when data exists
     cookie:{
       secure: process.env.NODE_ENV === 'production', // only transmit cookie over https
-      maxAge: 3 * 60 * 60 * 1000, // 3 hours in milliseconds
-      sameSite:process.env.NODE_ENV === 'production'?'strict':'lax'
+      maxAge: 3 * 60 * 60 * 1000 // 3 hours in milliseconds
     }
   })
 );
+
+
+if(process.env.NODE_ENV === 'production'){
+   app.set('trust proxy', 1); // trust first proxy
+}
 
 
 app.use(router);
