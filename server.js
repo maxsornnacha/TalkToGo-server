@@ -20,7 +20,7 @@ const { createClient } = require('redis');
 //เชื่อมต่อ mongoose
 mongoose.connect(process.env.DATABASE)
 .then(()=>{
-    console.log(`mongoDB database is connected to this server`);
+    console.log(`mongoDB database has been connected to this server !`)
 })
 .catch((error)=>{
     console.log('error to connect to the database, the reason is as followed :',error)
@@ -36,8 +36,6 @@ app.use(express.json());
 const corsOptions = {
     origin: [process.env.CLIENT_URL , process.env.CLIENT_URL_1],
     credentials: true,
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Origin,X-Requested-With,Content-Type,Accept,Authorization',
 };
 app.use(cors(corsOptions));
 
@@ -76,7 +74,7 @@ app.use(
     cookie:{
       secure: process.env.NODE_ENV === 'production', // only transmit cookie over https
       maxAge: 3 * 60 * 60 * 1000, // 3 hours in milliseconds
-      sameSite:process.env.NODE_ENV === 'production'?'none':'lax'
+      sameSite:process.env.NODE_ENV === 'production'?'lax':'lax'
     }
   })
 );
@@ -91,5 +89,5 @@ app.listen(port ,()=>{
     console.log(`port main server running on ${port}`)
     console.log(`client url : ${process.env.CLIENT_URL}`)
     console.log(`client url 1 : ${process.env.CLIENT_URL_1}`)
-    console.log(`running for : ${process.env.NODE_ENV}`)
+    console.log(`this server is running for ${process.env.NODE_ENV}`)
 });
