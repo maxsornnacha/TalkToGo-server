@@ -75,7 +75,8 @@ app.use(
     saveUninitialized: false, // recommended: only save session when data exists
     cookie:{
       secure: process.env.NODE_ENV === 'production', // only transmit cookie over https
-      maxAge: 3 * 60 * 60 * 1000 // 3 hours in milliseconds
+      maxAge: 3 * 60 * 60 * 1000, // 3 hours in milliseconds
+      sameSite: 'none'
     }
   })
 );
