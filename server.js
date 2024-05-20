@@ -76,7 +76,8 @@ app.use(
     cookie:{
       secure: process.env.NODE_ENV === 'production', // only transmit cookie over https
       maxAge: 3 * 60 * 60 * 1000, // 3 hours in milliseconds
-      sameSite: 'none'
+      sameSite: process.env.NODE_ENV === 'production'?'none':'lax',
+      httpOnly: process.env.NODE_ENV === 'production', 
     }
   })
 );
@@ -97,4 +98,5 @@ app.listen(port ,()=>{
     console.log(`client url : ${process.env.CLIENT_URL}`)
     console.log(`client url 1 : ${process.env.CLIENT_URL_1}`)
     console.log(`this server is running for ${process.env.NODE_ENV}`)
+    console.log(`production confirmation : ${process.env.NODE_ENV === 'production'}`)
 });
