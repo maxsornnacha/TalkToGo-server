@@ -21,7 +21,7 @@ const postSchema = new mongoose.Schema({
         required:true,
     },
     accountImage:{
-        type:String,
+        type:Object,
         required:true
     },
     content:{
@@ -29,11 +29,11 @@ const postSchema = new mongoose.Schema({
         default:''
     },
     image:{
-        type:String,
+        type:Object,
         default:null
     },
     video:{
-        type:String,
+        type:Object,
         default:null
     },
     currentDate:{

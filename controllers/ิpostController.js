@@ -29,18 +29,20 @@ try{
     
     //Upload image to cloud storage
     if(image){
-        await cloudinary.uploader.upload(image,
-            { public_id: Date.now()},
-            function(error, result){console.log(result); })
-            //Upload URL to mongoDB
+        await cloudinary.v2.uploader.upload(image,
+            { public_id: `${uuidv4()}-${Date.now()}`,
+              folder:'talkstogo/post-images'
+            })
             .then((result)=>{
-                image=result.url
+                image=result
                 public_id=result.public_id
             })
             .catch((err)=>{
                 res.status(404).json({error:"Image upload failed :",err})
                 console.log(err)
                 image = null;
+                statusDisplay = 404
+                errorMessage = 'Image upload failed'
             })
     }
     if(content.length === 0 && !image && !video){
@@ -245,17 +247,19 @@ try{
 
      //Upload image to cloud storage
      if(image){
-        await cloudinary.uploader.upload(image,
-            { public_id: Date.now()},
-            function(error, result){console.log(result); })
-            //Upload URL to mongoDB
+        await cloudinary.v2.uploader.upload(image,
+            { public_id:`${uuidv4()}-${Date.now()}`,
+              folder:'talkstogo/post-images/comment-images'
+            })
             .then((result)=>{
-                image=result.url
+                image=result
                 public_id=result.public_id
             })
             .catch((err)=>{
                 res.status(404).json({error:"Uploading failed, please try again"})
                 console.log(err)
+                statusDisplay = 404
+                errorMessage = 'Uploading image failed'
             })
     }
 
@@ -301,21 +305,21 @@ try{
     let image = req.body.replyImage
     const replyID = uuidv4()
 
-    console.log(commentID)
-
      //Upload image to cloud storage
      if(image){
-        await cloudinary.uploader.upload(image,
-            { public_id: Date.now()},
-            function(error, result){console.log(result); })
-            //Upload URL to mongoDB
+        await cloudinary.v2.uploader.upload(req.body.replyImage,
+            {public_id:`${uuidv4()}-${Date.now()}`,
+             folder:'talkstogo/post-images/reply-images'
+            })
             .then((result)=>{
-                image=result.url
+                image=result
                 public_id=result.public_id
             })
             .catch((err)=>{
                 res.status(404).json({error:"Uploading failed, please try again"})
                 console.log(err)
+                statusDisplay = 404;
+                errorMessage = 'Uploading image failed';
             })
     }
 
@@ -325,7 +329,7 @@ try{
         { new: true }
     ).exec()
     .then(async (data)=>{    
-        res.json('Success')          
+        res.json(data)          
     })
     .catch((error)=>{
         console.log('Uploading reply error due to :', error)
@@ -357,8 +361,32 @@ exports.deletePost = async (req,res)=>{
     let errorMessage = ''
 try{
     const postID = req.body.postID;
+    const postImage = req.body.postImage;
+    const commentImages = req.body.commentImages;
+    const replyImages = req.body.replyImages;
+
     Posts.findByIdAndDelete(postID)
     .then((data)=>{
+
+        // Delete the image
+        if(postImage){
+        cloudinary.uploader.destroy(postImage.public_id)
+        .then((result)=>console.log('Image deleted successfully :', result))
+        .catch((error)=> console.error('Image deleted unsuccessfully :', error))
+        }
+
+        if(commentImages && commentImages.length > 0){
+            commentImages.forEach(commentImage => {
+                cloudinary.uploader.destroy(commentImage.public_id)
+            });
+        }
+
+        if(replyImages && replyImages.length > 0){
+            replyImages.forEach(replyImage => {
+                cloudinary.uploader.destroy(replyImage.public_id)
+            });
+        }
+
         res.json(data);
     })
     .catch((error)=>{
@@ -377,18 +405,25 @@ exports.editPost = async (req,res)=>{
     let statusDisplay = ''
     let errorMessage = ''
 try{
-    const {postID , content } = req.body;
+    const {postID , content , video } = req.body;
+    let prevImage = req.body.prevImage;
     let image = req.body.image;
     let public_id = '';
 
     //upload Image on cloud storage
     if(image && image.length > 100){
-        await cloudinary.uploader.upload(req.body.image,
-            { public_id: Date.now()},
-            function(error, result){console.log(result); })
-            //Upload URL to mongoDB
+        await cloudinary.v2.uploader.upload(req.body.image,
+            { public_id: `${uuidv4()}-${Date.now()}`,
+              folder:'talkstogo/post-images'
+            })
             .then((result)=>{
-                image=result.url
+                
+                if(prevImage){
+                // Delete the previous image
+                cloudinary.uploader.destroy(prevImage.public_id)
+                }
+
+                image=result
                 public_id=result.public_id
             })
             .catch((error)=>{
@@ -401,7 +436,7 @@ try{
 
 
     Posts.findByIdAndUpdate(postID,{
-        $set :{content : content, image : image}
+        $set :{content : content, image : image , video:video}
     },{
         new:true
     })

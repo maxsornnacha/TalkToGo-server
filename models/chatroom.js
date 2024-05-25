@@ -10,7 +10,7 @@ const chatroomSchema = new mongoose.Schema({
     messages:[{
         senderID: { type:String, required: true },
         content: { type: String, default:''},
-        image: { type: String , default:null},
+        image: { type: Object , default:null},
         timestamp: { type: Date, default: Date.now },
         isRead:{type: Boolean, default:false}
     }]

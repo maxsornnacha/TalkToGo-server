@@ -31,7 +31,7 @@ const registrationSchema = new mongoose.Schema({
         unique:true
     },
     accountImage:{
-        type:String,
+        type:Object,
         required:true
     },
     verified:{

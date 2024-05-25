@@ -23,12 +23,12 @@ try{
 
     //Upload image to cloud storage
     if(roomIcon){
-        await cloudinary.uploader.upload(roomIcon,
-            { public_id: Date.now()},
-            function(error, result){console.log(result); })
-            //Upload URL to mongoDB
+        await cloudinary.v2.uploader.upload(roomIcon,
+            { public_id:`${uuidv4()}-${Date.now()}`,
+              folder:'talkstogo/room-images/room-icons'
+            })
             .then((result)=>{
-                roomIcon=result.url
+                roomIcon=result
                 public_id=result.public_id
             })
             .catch((err)=>{
@@ -506,6 +506,23 @@ try{
     const {chatroom , roomData} = req.body
 
     if(roomData.chatChannels.length > 1){
+    await TalkingRooms.findOne({'chatChannels._id':chatroom._id})
+    .then((roomData)=>{
+        const targetedChatChannel = roomData.chatChannels.filter((chatChannel) => 
+        {  
+            return (chatChannel._id).toString() === (chatroom._id).toString()      
+        });
+        if(targetedChatChannel && targetedChatChannel.length > 0){
+            const messageHavingImages = targetedChatChannel[0].messages.filter(message => message.images || message.images.length > 0);
+            const images = messageHavingImages.map(message => message.images);
+            const flattenedImages = images.flat();
+            flattenedImages.forEach((image)=>{
+                cloudinary.uploader.destroy(image.public_id)
+            })
+        }
+       
+    })
+    
     await TalkingRooms.findOneAndUpdate(
     {'chatChannels._id':chatroom._id},
     {$pull: {chatChannels :{_id : chatroom._id}}},
@@ -539,16 +556,23 @@ exports.changeRoomInfo = async (req,res)=>{
 try{
     const {roomName , roomDescription , roomID} = req.body
     let public_id = ''
-    let roomIcon = req.body.roomIcon
-    
+    let prevRoomIcon = req.body.prevRoomIcon;
+    let roomIcon = req.body.roomIcon;
+    console.log(prevRoomIcon);
+    console.log(roomIcon);
       //Upload image to cloud storage
       if(roomIcon && roomIcon.length > 100){
-        await cloudinary.uploader.upload(roomIcon,
-            { public_id: Date.now()},
-            function(error, result){console.log(result); })
-            //Upload URL to mongoDB
+        await cloudinary.v2.uploader.upload(roomIcon,
+            { public_id:`${uuidv4()}-${Date.now()}`,
+              folder:'talkstogo/room-images/room-icons'
+            })
             .then((result)=>{
-                roomIcon=result.url
+            // Delete the previous image
+            if(req.body.prevRoomIcon){
+            cloudinary.uploader.destroy(prevRoomIcon.public_id)
+             }
+
+                roomIcon=result
                 public_id=result.public_id
             })
             .catch((err)=>{
@@ -653,9 +677,17 @@ exports.roomDeleting = async (req,res)=>{
     let statusDisplay = ''
     let errorMessage = ''
 try{
-    const {roomID} = req.body
+    const {roomID , roomIcon} = req.body;
+
     await TalkingRooms.findByIdAndDelete(roomID)
     .then((data)=>{
+        //Delete room icon
+        if(roomIcon){
+            cloudinary.uploader.destroy(roomIcon.public_id)
+            .then((result)=>console.log('Image deleted successfully :', result))
+            .catch((error)=> console.error('Image deleted unsuccessfully :', error))
+        }
+
         res.json(data)
     })
     .catch((error)=>{
@@ -781,8 +813,11 @@ try{
          if(images && images.length > 0){
 
             images = await Promise.all(images.map(async (image)=>{
-                const result = await cloudinary.uploader.upload(image, { public_id: Date.now() });
-                return { image: result.url, public_id: result.public_id };
+                const result = await cloudinary.v2.uploader.upload(image, { 
+                    public_id:`${uuidv4()}-${Date.now()}`,
+                    folder:'talkstogo/room-images/chat-channel-images'
+                });
+                return { image: result, public_id: result.public_id };
             }))
             .catch(error =>{
                 console.log('Uploading failed due to :', error)

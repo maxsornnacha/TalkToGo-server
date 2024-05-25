@@ -34,7 +34,7 @@ const transporter = nodemailer.createTransport({
         const mailOptions = {
             from: process.env.AUTH_EMAIL,
             to: email,
-            subject : "Verify your Email in TalkToGo",
+            subject : "Verify your Email in TalksToGo",
             html: `<p>Fill OTP <b>${OTP}</b> on the website or application to verify your email address. Otherwise your account will be inaccessible.</p>
             <p>Please verify your email within <b>1 hour</b> or the OTP will be expire.</p>`
             }
@@ -261,12 +261,12 @@ try{
 
      //Upload image to cloud storage
      if(image){
-        await cloudinary.uploader.upload(req.body.accountImage,
-            { public_id: Date.now()},
-            function(error, result){console.log(result); })
-            //Upload URL to mongoDB
+        await cloudinary.v2.uploader.upload(req.body.accountImage,
+            { public_id:`${uuidv4()}-${Date.now()}`,
+              folder:'talkstogo/account-images'
+            })
             .then((result)=>{
-                image=result.url
+                image=result
                 public_id=result.public_id
             })
             .catch((error)=>{
@@ -276,7 +276,7 @@ try{
                 console.log(error)
             })
     }else{
-        image = 'https://res.cloudinary.com/dakcwd8ki/image/upload/v1707512097/wwfulsac153rtabq45as.png'
+        image = 'https://res.cloudinary.com/dakcwd8ki/image/upload/v1716573817/default-images/u1hpxlplwpgcusumfjnj.png'
     }
 
     const userData = await Members.findOne({ email: email })

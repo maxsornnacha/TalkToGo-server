@@ -1,6 +1,7 @@
 const Chatrooms = require('../models/chatroom')
 const Members = require('../models/registration')
 const cloudinary = require('cloudinary')
+const { v4: uuidv4 } = require('uuid');
 
 cloudinary.config({ 
     cloud_name:process.env.CLOUDINARY_CLOUD_NAME, 
@@ -91,17 +92,19 @@ exports.sendMessage = async (req,res)=>{
 
     //Upload image to cloud storage
     if(image){
-        await cloudinary.uploader.upload(image,
-            { public_id: Date.now()},
-            function(error, result){console.log(result); })
-            //Upload URL to mongoDB
+        await cloudinary.v2.uploader.upload(image,
+            { public_id:`${uuidv4()}-${Date.now()}`,
+              folder:'talkstogo/chat-images'
+            })
             .then((result)=>{
-                image=result.url
+                image=result
                 public_id=result.public_id
             })
             .catch((err)=>{
-                res.status(404).json({error:"Recording failed, please try again"})
+                res.status(404).json({error:"Uploading image failed, please try again"})
                 console.log(err)
+                statusDisplay = 404
+                errorMessage = 'Uploading image failed'
             })
     }
 
@@ -231,6 +234,24 @@ exports.deleteChatmessegeRoom = async (req,res) => {
     let errorMessage = ''
 try{
     const {senderID,getterID} = req.body
+    await Chatrooms.findOne({participants:{$all:[senderID,getterID]}})
+    .then((data)=>{
+        const imageMsg = data.messages.filter((message)=>{
+            return message.image
+        })
+
+        if(imageMsg && imageMsg.length > 0){
+        const public_ids = imageMsg.map((message)=>{
+            return message.image.public_id
+        })
+
+        // Delete the images in the chat box
+        public_ids.forEach((public_id)=>{
+        cloudinary.uploader.destroy(public_id)
+        })
+        }
+    })
+
     await Chatrooms.findOneAndDelete({participants:{$all:[senderID,getterID]}})
     .then((data)=>{
         res.json(data)

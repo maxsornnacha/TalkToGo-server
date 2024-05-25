@@ -10,7 +10,7 @@ const chatChannelSchema = new mongoose.Schema({
         senderData: { type: Object, required: true },
         content: { type: String , default:''},
         images: { type: Array, default:null},
-        video:{ type: String, default:null},
+        video:{ type: Object, default:null},
         file:{type: Object, default:null},
         timestamp: { type: Date, default: Date.now }
     }]
@@ -37,7 +37,7 @@ const talkingChannelSchema = new mongoose.Schema({
             firstname: String,
             lastname: String,
             email: String,
-            accountImage: String,
+            accountImage: Object,
             createdAt: {
                 type: Date,
                 default: Date.now
@@ -76,7 +76,7 @@ const mainTalkingroomSchema = new mongoose.Schema({
         require:true
     },
     roomIcon:{
-        type:String,
+        type:Object,
         require:true
     },
     participants:[{
