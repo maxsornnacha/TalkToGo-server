@@ -677,15 +677,20 @@ exports.roomDeleting = async (req,res)=>{
     let statusDisplay = ''
     let errorMessage = ''
 try{
-    const {roomID , roomIcon} = req.body;
+    const {roomID , roomIcon , allImagesID} = req.body;
+    console.log(allImagesID);
 
     await TalkingRooms.findByIdAndDelete(roomID)
     .then((data)=>{
         //Delete room icon
         if(roomIcon){
             cloudinary.uploader.destroy(roomIcon.public_id)
-            .then((result)=>console.log('Image deleted successfully :', result))
-            .catch((error)=> console.error('Image deleted unsuccessfully :', error))
+        }
+
+        if(allImagesID){
+            allImagesID.forEach((public_id)=>{
+                cloudinary.uploader.destroy(public_id)
+            })
         }
 
         res.json(data)
