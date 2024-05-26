@@ -94,16 +94,16 @@ exports.displayPost = async (req,res)=>{
     let errorMessage = ''
 try{
 
-    Posts.find().exec()
-    .then((data)=>{
-        res.json(data)
-    })
-    .catch((error)=>{
-        console.log('Fetching all the posts error due to :', error)
-        res.status(404).json({error:'No any posts were found'})
-        statusDisplay = 404
-        errorMessage = 'No any posts were found'
-    })
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    // Calculate the number of documents to skip
+    const skip = (page - 1) * limit;
+
+     // Fetch posts with pagination and sort by creation date in descending order
+    const posts = await Posts.find().sort({ createdAt: -1 }).skip(skip).limit(limit).exec();
+     res.json(posts);
+
 
 }
 catch(error){
