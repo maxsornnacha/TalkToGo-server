@@ -95,7 +95,7 @@ exports.displayPost = async (req,res)=>{
 try{
 
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const limit = parseInt(req.query.limit) || 15;
 
     // Calculate the number of documents to skip
     const skip = (page - 1) * limit;
@@ -218,15 +218,15 @@ exports.displayPostForProfile = async (req,res)=>{
     let errorMessage = ''
 try{
 
-    Posts.find({accountID:req.params.id}).exec()
-    .then((data)=>{
-        res.json(data)})
-    .catch((error)=>{
-        console.log('Fetching all the posts of one account error due to :', error)
-        res.status(404).json({error:'No any posts was found'})
-        statusDisplay = 404
-        errorMessage = 'No any posts was found'
-    })
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 15;
+
+    // Calculate the number of documents to skip
+    const skip = (page - 1) * limit;
+
+
+    const posts = await Posts.find({accountID:req.params.id}).sort({ createdAt: -1 }).skip(skip).limit(limit).exec();
+     res.json(posts);
 
 }
 catch(error){

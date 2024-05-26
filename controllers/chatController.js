@@ -178,7 +178,7 @@ exports.getAllMessages = async (req,res)=>{
     let errorMessage = ''
     try{
     const {senderID} = req.params
-
+    
     await Chatrooms.find({participants:{$all:[senderID]}}).exec()
     .then(async (data)=>{
         const messageAll = await data.filter((chatData)=>{
