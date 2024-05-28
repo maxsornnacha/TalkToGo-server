@@ -15,7 +15,7 @@ exports.createPost = async (req,res)=>{
     let errorMessage = ''
 try{
     const postID = uuidv4()
-    const {content,firstname,lastname,accountImage,currentDate,currentTime,id} = req.body
+    const {content,firstname,lastname,accountImage,currentDate,currentTime,id , account_id} = req.body
     let public_id = ''
     let image = req.body.image
     let video = req.body.video
@@ -53,7 +53,7 @@ try{
         video = null;
     }else{
     //Uploading on Posts
-    await Posts.create({accountID:id,postID,content,firstname,lastname,accountImage,currentDate,currentTime,image,video,
+    await Posts.create({account_id,accountID:id,postID,content,firstname,lastname,accountImage,currentDate,currentTime,image,video,
         comments:[],likes:[]
     })
     .then(async (data)=>{
@@ -99,6 +99,7 @@ try{
 
     // Calculate the number of documents to skip
     const skip = (page - 1) * limit;
+    
 
      // Fetch posts with pagination and sort by creation date in descending order
     const posts = await Posts.find().sort({ createdAt: -1 }).skip(skip).limit(limit).exec();

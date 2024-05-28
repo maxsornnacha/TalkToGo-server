@@ -3,6 +3,10 @@ const mongoose = require('mongoose')
 
 //Schema post form
 const postSchema = new mongoose.Schema({
+    account_id:{
+        type:String,
+        required:true,
+    },
     accountID:{
         type:String,
         required:true,
